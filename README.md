@@ -1,5 +1,7 @@
 # T-DEED_v2
 
+**(Under Construction)**
+
 ### T-DEED: Temporal-Discriminability Enhancer Encoder-Decoder for Precise Event Spotting in Sports Videos (CVsports '24)
 
 [![PyTorch](https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
