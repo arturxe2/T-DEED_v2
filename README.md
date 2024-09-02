@@ -1,19 +1,18 @@
 # T-DEED_v2
-### T-DEED: Temporal-Discriminability Enhancer Encoder-Decoder for Precise Event Spotting in Sports Videos (CVsports '24)
-<a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 
+### T-DEED: Temporal-Discriminability Enhancer Encoder-Decoder for Precise Event Spotting in Sports Videos (CVsports '24)
+
+[![PyTorch](https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
 
 This repository contains the PyTorch implementation of the extended version of the paper:
 
-**T-DEED: Temporal-Discriminability Enhancer Encoder-Decoder for Precise Event Spotting in Sports Videos**<br>
-*Artur Xarles, Sergio Escalera, Thomas B. Moeslund, and Albert Clapés*<br>
-**10th International Workshop on Computer Vision in Sports (CVsports) at CVPR 2024**<br>
-
+**T-DEED: Temporal-Discriminability Enhancer Encoder-Decoder for Precise Event Spotting in Sports Videos**  
+*Artur Xarles, Sergio Escalera, Thomas B. Moeslund, and Albert Clapés*  
+**10th International Workshop on Computer Vision in Sports (CVsports) at CVPR 2024**
 
 ## Overview
 
-This repository extends the previous [T-DEED implementation](https://github.com/arturxe2/T-DEED) to evaluate the model in additional PES datasets, and the broader Action Spotting task on SoccerNet Action Spotting (SNAS) and SoccerNet Ball Action Spotting. This implementation also includes the implementation used to achieve the 1st position on the 2024 SNBAS Challenge. 
-
+This repository builds upon the original [T-DEED implementation](https://github.com/arturxe2/T-DEED) to evaluate the model across additional PES datasets and the broader Action Spotting task, including SoccerNet Action Spotting (SNAS) and SoccerNet Ball Action Spotting (SNBAS). Notably, this implementation was also used to achieve the 1st place in the 2024 SNBAS Challenge.
 
 ## Environment
 
