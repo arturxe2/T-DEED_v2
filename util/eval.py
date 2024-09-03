@@ -139,6 +139,59 @@ def process_frame_predictions(dataset, classes, pred_dict, high_recall_score_thr
         
     return err, f1, pred_events, pred_events_high_recall, pred_scores
 
+def process_frame_predictions_challenge(
+        dataset, classes, pred_dict, high_recall_score_threshold=0.05
+):
+    classes_inv = {v: k for k, v in classes.items()}
+
+    fps_dict = {}
+    for video, _, fps in dataset.videos:
+        fps_dict[video] = fps
+
+    pred_events = []
+    pred_events_high_recall = []
+    pred_scores = {}
+    h = 0
+    for video, (scores, support) in (sorted(pred_dict.items())):
+        #h += 1
+        #if h > 50:
+        #    break
+        if np.min(support) == 0:
+            support[support == 0] = 1
+        assert np.min(support) > 0, (video, support.tolist())
+        scores /= support[:, None]
+        pred = np.argmax(scores, axis=1)
+
+        pred_scores[video] = scores.tolist()
+
+        events = []
+        events_high_recall = []
+        for i in range(pred.shape[0]):
+
+            if pred[i] != 0:
+                events.append({
+                    'label': classes_inv[pred[i]],
+                    'frame': i,
+                    'score': scores[i, pred[i]].item()
+                })
+
+            for j in classes_inv:
+                if scores[i, j] >= high_recall_score_threshold:
+                    events_high_recall.append({
+                        'label': classes_inv[j],
+                        'frame': i,
+                        'score': scores[i, j].item()
+                    })
+
+        pred_events.append({
+            'video': video, 'events': events,
+            'fps': fps_dict[video]})
+        pred_events_high_recall.append({
+            'video': video, 'events': events_high_recall,
+            'fps': fps_dict[video]})
+
+    return pred_events, pred_events_high_recall, pred_scores
+
 def non_maximum_supression(pred, window, threshold = 0.0):
     preds = copy.deepcopy(pred)
     new_pred = []
@@ -295,8 +348,12 @@ def evaluate(model, dataset, split, classes, save_pred=None, printed = True,
                 scores[start:end, :] += np.sum(pred_scores, axis=0)
                 support[start:end] += pred_scores.shape[0]
 
-    err, f1, pred_events, pred_events_high_recall, pred_scores = \
-        process_frame_predictions(dataset, classes, pred_dict, high_recall_score_threshold=0.01)
+    if split != 'CHALLENGE':
+        err, f1, pred_events, pred_events_high_recall, pred_scores = \
+            process_frame_predictions(dataset, classes, pred_dict, high_recall_score_threshold=0.01)
+    else:
+        pred_events, pred_events_high_recall, pred_scores = \
+            process_frame_predictions_challenge(dataset, classes, pred_dict, high_recall_score_threshold=0.01)
 
     if not test:
         pred_events_high_recall = non_maximum_supression(pred_events_high_recall, window = windows[0], threshold = 0.10)
@@ -306,52 +363,60 @@ def evaluate(model, dataset, split, classes, save_pred=None, printed = True,
     
     else:
 
-        print('=== Results on {} (w/o NMS) ==='.format(split))
-        print('Error (frame-level): {:0.2f}\n'.format(err.get() * 100))
+        if split != 'CHALLENGE':
 
-        def get_f1_tab_row(str_k):
-            k = classes[str_k] if str_k != 'any' else None
-            return [str_k, f1.get(k) * 100, *f1.tp_fp_fn(k)]
-        rows = [get_f1_tab_row('any')]
-        for c in sorted(classes):
-            rows.append(get_f1_tab_row(c))
+            print('=== Results on {} (w/o NMS) ==='.format(split))
+            print('Error (frame-level): {:0.2f}\n'.format(err.get() * 100))
 
-        print(tabulate(rows, headers=['Exact frame', 'F1', 'TP', 'FP', 'FN'],
-                        floatfmt='0.2f'))
-        print()
+            def get_f1_tab_row(str_k):
+                k = classes[str_k] if str_k != 'any' else None
+                return [str_k, f1.get(k) * 100, *f1.tp_fp_fn(k)]
+            rows = [get_f1_tab_row('any')]
+            for c in sorted(classes):
+                rows.append(get_f1_tab_row(c))
 
-        mAPs, _ = compute_mAPs(dataset.labels, pred_events_high_recall, tolerances=tolerances, printed = printed)
-        avg_mAP = np.mean(mAPs)
+            print(tabulate(rows, headers=['Exact frame', 'F1', 'TP', 'FP', 'FN'],
+                            floatfmt='0.2f'))
+            print()
 
-        print('=== Results on {} (w/ NMS{}) ==='.format(split, str(windows[0])))
-        pred_events_high_recall_nms = non_maximum_supression(pred_events_high_recall, window = windows[0], threshold=0.01)
-        mAPs, tolerances = compute_mAPs(dataset.labels, pred_events_high_recall_nms, tolerances=tolerances, printed = printed)
-        avg_mAP_nms = np.mean(mAPs)
+            mAPs, _ = compute_mAPs(dataset.labels, pred_events_high_recall, tolerances=tolerances, printed = printed)
+            avg_mAP = np.mean(mAPs)
 
-        print('=== Results on {} (w/ SNMS{}) ==='.format(split, str(windows[1])))
-        pred_events_high_recall_snms = soft_non_maximum_supression(pred_events_high_recall, window = windows[1], threshold=0.01)
-        mAPs, _ = compute_mAPs(dataset.labels, pred_events_high_recall_snms, tolerances=tolerances, printed = printed)
-        avg_mAP_snms = np.mean(mAPs)
+            print('=== Results on {} (w/ NMS{}) ==='.format(split, str(windows[0])))
+            pred_events_high_recall_nms = non_maximum_supression(pred_events_high_recall, window = windows[0], threshold=0.01)
+            mAPs, tolerances = compute_mAPs(dataset.labels, pred_events_high_recall_nms, tolerances=tolerances, printed = printed)
+            avg_mAP_nms = np.mean(mAPs)
+
+            print('=== Results on {} (w/ SNMS{}) ==='.format(split, str(windows[1])))
+            pred_events_high_recall_snms = soft_non_maximum_supression(pred_events_high_recall, window = windows[1], threshold=0.01)
+            mAPs, _ = compute_mAPs(dataset.labels, pred_events_high_recall_snms, tolerances=tolerances, printed = printed)
+            avg_mAP_snms = np.mean(mAPs)
 
 
-        if avg_mAP_snms > avg_mAP_nms:
-            print('Storing predictions with SNMS')
-            pred_events_high_recall_store = pred_events_high_recall_snms
-        else:
-            print('Storing predictions with NMS')
-            pred_events_high_recall_store = pred_events_high_recall_nms
-        
-        if save_pred is not None:
-            if not os.path.exists('/'.join(save_pred.split('/')[:-1])):
-                os.makedirs('/'.join(save_pred.split('/')[:-1]))
-            store_json(save_pred + '.json', pred_events_high_recall_store)
+            if avg_mAP_snms > avg_mAP_nms:
+                print('Storing predictions with SNMS')
+                pred_events_high_recall_store = pred_events_high_recall_snms
+            else:
+                print('Storing predictions with NMS')
+                pred_events_high_recall_store = pred_events_high_recall_nms
             
-            if dataset._dataset == 'soccernet':
-                store_json_sn(save_pred, pred_events_high_recall_store, stride = dataset._stride)
-            if dataset._dataset == 'soccernetball':
-                store_json_snb(save_pred, pred_events_high_recall_store, stride = dataset._stride)
+            if save_pred is not None:
+                if not os.path.exists('/'.join(save_pred.split('/')[:-1])):
+                    os.makedirs('/'.join(save_pred.split('/')[:-1]))
+                store_json(save_pred + '.json', pred_events_high_recall_store)
+                
+                if dataset._dataset == 'soccernet':
+                    store_json_sn(save_pred, pred_events_high_recall_store, stride = dataset._stride)
+                if dataset._dataset == 'soccernetball':
+                    store_json_snb(save_pred, pred_events_high_recall_store, stride = dataset._stride)
 
-        return mAPs, tolerances
+            return mAPs, tolerances
+        
+        else:
+            pred_events_high_recall_store = soft_non_maximum_supression(pred_events_high_recall, window = windows[1], threshold=0.01)
+            print('Storing predictions Challenge with SNMS')
+            store_json_sn(save_pred, pred_events_high_recall, stride = dataset._stride)
+            return None, None
 
 
 def valMAP_SN(labels, preds, framerate = 25, metric = "tight", version = 2):
