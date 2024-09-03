@@ -415,7 +415,7 @@ def evaluate(model, dataset, split, classes, save_pred=None, printed = True,
         else:
             pred_events_high_recall_store = soft_non_maximum_supression(pred_events_high_recall, window = windows[1], threshold=0.01)
             print('Storing predictions Challenge with SNMS')
-            store_json_sn(save_pred, pred_events_high_recall, stride = dataset._stride)
+            store_json_snb(save_pred, pred_events_high_recall, stride = dataset._stride)
             return None, None
 
 
