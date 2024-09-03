@@ -25,8 +25,8 @@
     "criterion": "map",
     "num_workers": 4,
     "pretrain": {
-        "frame_dir": "/data-local/data1-ssd/axesparraguera/SoccerNetFrames224",
-        "store_dir": "/data-local/data1-ssd/axesparraguera/Spot/SoccerNetStore",
+        "frame_dir": "/path/to/frames",
+        "store_dir": "/path/to/store2",
         "dataset": "soccernet",
         "num_classes": 17
     }
