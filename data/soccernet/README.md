@@ -2,7 +2,7 @@
 
 This directory contains the splits converted from the original SoccerNet Action Spotting dataset, available at: https://www.soccer-net.org/tasks/action-spotting.
 
-To download the videos follow instructions provided in [SoccerNet](https://www.soccer-net.org/tasks/action-spotting), and to generate the folder structure for frames, use the provided script [extract_frames_sn.py] adapted from E2E-Spot.
+To download the videos follow instructions provided in [SoccerNet](https://www.soccer-net.org/tasks/action-spotting), and to generate the folder structure for frames, use the provided script [extract_frames_sn.py](../../extract_frames_snb.py) adapted from E2E-Spot.
 
 Frames are extracted at a resolution of 796x448, and frame naming convention is as follows:
 
