@@ -4,6 +4,8 @@ This directory contains the splits converted from the original SoccerNet Ball Ac
 
 To download the videos follow instructions provided in [SoccerNet](https://www.soccer-net.org/tasks/ball-action-spotting), and to generate the folder structure for frames, use the provided script [extract_frames_snb.py] adapted from E2E-Spot.
 
+To train T-DEED for the challenge split, modify `train.json` and `val.json` for `train_challenge.json` and `val_challenge`. 
+
 Frames are extracted at a resolution of 796x448, and frame naming convention is as follows:
 
 ```
