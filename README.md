@@ -37,7 +37,7 @@ The `train_tdeed.py` file is designed to train and evaluate T-DEED based on the 
 python3 train_tdeed.py --model <model_name>
 ```
 
-Here, `<model_name>` follows the format `<dataset>_<name>`, where `<dataset>` is one of the three possible datasets (FigureSkatingComp, FigureSkatingPerf, or FineDiving), and `<name>` can be chosen freely but must match the name specified in the configuration file located in the config directory.
+Here, `<model_name>` follows the format `<dataset>_<name>`, where `<dataset>` is one of the possible datasets (FigureSkatingComp, FigureSkatingPerf, FineDiving, FineGym, Tennis, SoccerNet, or SoccerNetBall), and `<name>` can be chosen freely but must match the name specified in the configuration file located in the config directory.
 
 For example, to use the FineDiving dataset with the small model (200MF), you would run:
 
@@ -46,6 +46,9 @@ python3 train_tdeed.py --model FineDiving_small
 ```
 
 You can control whether to train the whole model or just evaluate it using the `only_test` parameter in the configuration file. For additional details on configuration options, refer to the README in the [config](/config/) directory.
+
+
+Before running the model, ensure that you have downloaded the dataset frames and updated the directory-related configuration parameters in the relevant [config](/config/) files, as well as in the [SN](/data/soccernet/labels_path.txt) and [SNB](/data/soccernetball/labels_path.txt) label files. Additionally, make sure to run the script once with the `mode` parameter set to `store` to generate and save the clip partitions. After this initial run, you can set the `mode` to `load` to reuse the saved partitions for subsequent executions.
 
 ## Trained models
 
