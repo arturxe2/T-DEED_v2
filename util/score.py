@@ -13,7 +13,7 @@ from util.io import load_json, load_text
 FPS_SN = 25
 
 
-def parse_ground_truth(truth, stride = 1):
+def parse_ground_truth(truth):
     label_dict = defaultdict(lambda: defaultdict(list))
     
     for x in truth:
@@ -27,7 +27,7 @@ def parse_ground_truth(truth, stride = 1):
                 frame = int(int(e['position']) / 1000 * FPS_SN)
             else:
                 frame = e['frame']
-            label_dict[e['label']][x['video']].append(frame // stride)
+            label_dict[e['label']][x['video']].append(frame)
     
     return label_dict
 
@@ -104,9 +104,7 @@ def compute_mAPs(
     assert {v['video'] for v in truth} == {v['video'] for v in pred}, \
         'Video set mismatch!'
     
-
-    truth_by_label = parse_ground_truth(truth, stride = stride)
-
+    truth_by_label = parse_ground_truth(truth)
 
     fig, axes = None, None
     if plot_pr:
