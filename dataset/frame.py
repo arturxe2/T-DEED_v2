@@ -318,7 +318,7 @@ class FrameReader:
 
             elif self.dataset == 'soccernet':
                 frame = frame_num
-                frame_path = os.path.join(self._frame_dir, video_name, str(frame) + '.jpg')
+                frame_path = os.path.join(self._frame_dir, video_name, 'frame' + str(frame) + '.jpg')
                 base_path = os.path.join(self._frame_dir, video_name)   
                 ndigits = -1      
 
@@ -361,10 +361,10 @@ class FrameReader:
 
         ret = []
         if ndigits == -1:
-            if self.dataset == 'soccernet':
-                path = base_path + '/'
-            else:
-                path = os.path.join(base_path, 'frame')
+            #if self.dataset == 'soccernet':
+            #    path = base_path + '/'
+            #else:
+            path = os.path.join(base_path, 'frame')
             _ = [ret.append(self.read_frame(path + str(start + j * stride) + '.jpg')) for j in range(length - pad_start - pad_end)]
 
         else:
@@ -590,7 +590,7 @@ class FrameReaderVideo:
 
             elif self._dataset == 'soccernet':
                 frame_path = os.path.join(
-                    self._frame_dir, video_name, str(frame_num) + '.jpg'
+                    self._frame_dir, video_name, 'frame' + str(frame_num) + '.jpg'
                 )
 
             elif self._dataset == 'soccernetball':
