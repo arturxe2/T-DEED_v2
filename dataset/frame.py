@@ -15,6 +15,7 @@ from torch.utils.data import Dataset
 import torchvision
 from tqdm import tqdm
 import pickle
+import math
 
 #Local imports
 
@@ -463,10 +464,11 @@ class ActionSpotVideoDataset(Dataset):
             labels_half = 0
         
         num_frames = meta['num_frames']
-        num_labels = num_frames // self._stride
+        num_labels = math.ceil(num_frames / self._stride) 
+        #num_labels = num_frames // self._stride
 
-        if (num_frames % self._stride != 0) & ((self._dataset != 'soccernet') & (self._dataset != 'soccernetball')):
-            num_labels += 1
+        #if (num_frames % self._stride != 0) & ((self._dataset != 'soccernet') & (self._dataset != 'soccernetball')):
+        #    num_labels += 1
         labels = np.zeros(num_labels, np.int64)
         for event in labels_file:
             if (self._dataset == 'soccernet') | (self._dataset == 'soccernetball'):
@@ -487,10 +489,10 @@ class ActionSpotVideoDataset(Dataset):
     def videos(self):
         if (self._dataset == 'soccernet') | (self._dataset == 'soccernetball'):
             return sorted([
-                (v['video'], v['num_frames'] // self._stride,
+                (v['video'], math.ceil(v['num_frames'] / self._stride),
                 FPS_SN / self._stride) for v in self._labels])
         return sorted([
-            (v['video'], v['num_frames'] // self._stride,
+            (v['video'], math.ceil(v['num_frames'] / self._stride),
             v['fps'] / self._stride) for v in self._labels])
 
     @property
@@ -515,6 +517,7 @@ class ActionSpotVideoDataset(Dataset):
                         half = int(e['gameTime'][0])
                         if half == int(x_copy['video'][-1]):
                             e['frame'] = int(int(e['position']) / 1000 * FPS_SN) // self._stride
+                    x_copy['events'] = labels_file
 
                 elif self._dataset == 'soccernetball':
                     labels_file = load_json(os.path.join(LABELS_SNB_PATH, x_copy['video'] + '/Labels-ball.json'))['annotations']
@@ -591,6 +594,7 @@ class FrameReaderVideo:
             elif self._dataset == 'soccernet':
                 frame_path = os.path.join(
                     self._frame_dir, video_name, 'frame' + str(frame_num) + '.jpg'
+                    #self._frame_dir, video_name, str(frame_num) + '.jpg'
                 )
 
             elif self._dataset == 'soccernetball':
