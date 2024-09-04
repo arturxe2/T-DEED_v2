@@ -271,15 +271,28 @@ def main(args):
                 results = evaluate_SN(LABELS_SN_PATH, '/'.join(pred_file.split('/')[:-1]) + '/preds', 
                             split = split, prediction_file = "results_spotting.json", version = 2, 
                             metric = "tight")
+                
+                results_loose = evaluate_SN(LABELS_SN_PATH, '/'.join(pred_file.split('/')[:-1]) + '/preds',
+                            split = split, prediction_file = "results_spotting.json", version = 2, 
+                            metric = "loose")
 
                 print('Tight aMAP: ', results['a_mAP'] * 100)
                 print('Tight aMAP per class: ', results['a_mAP_per_class'])
+
+                print('Loose aMAP: ', results_loose['a_mAP'] * 100)
+                print('Loose aMAP per class: ', results_loose['a_mAP_per_class'])
 
                 wandb.log({'test/mAP': results['a_mAP'] * 100})
                 wandb.summary['test/mAP'] = results['a_mAP'] * 100
 
                 for j in range(len(classes)):
                     wandb.log({'test/classes/mAP@' + list(classes.keys())[j]: results['a_mAP_per_class'][j] * 100})
+
+                wandb.log({'test/mAP_loose': results_loose['a_mAP'] * 100})
+                wandb.summary['test/mAP_loose'] = results_loose['a_mAP'] * 100
+
+                for j in range(len(classes)):
+                    wandb.log({'test/classes/mAP_loose@' + list(classes.keys())[j]: results_loose['a_mAP_per_class'][j] * 100})
 
             if args.dataset == 'soccernetball':
                 results = evaluate_SNB(LABELS_SNB_PATH, '/'.join(pred_file.split('/')[:-1]) + '/preds', split = split)
