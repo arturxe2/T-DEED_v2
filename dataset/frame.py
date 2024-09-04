@@ -44,7 +44,7 @@ class ActionSpotDataset(Dataset):
             mixup=False,                # Mixup usage
             pad_len=DEFAULT_PAD_LEN,    # Number of frames to pad the start
                                         # and end of videos
-            dataset = 'finediving'         # Dataset name
+            dataset = 'finediving'     # Dataset name
     ):
         self._src_file = label_file
         self._labels = load_json(label_file)
@@ -78,6 +78,13 @@ class ActionSpotDataset(Dataset):
         #Frame reader class
         self._frame_reader = FrameReader(frame_dir, modality, dataset = dataset)
 
+        #Variables for SN & SNB label paths if datastes
+        if (self._dataset == 'soccernet') | (self._dataset == 'soccernetball'):
+            global LABELS_SN_PATH
+            global LABELS_SNB_PATH
+            LABELS_SN_PATH = load_text(os.path.join('data', 'soccernet', 'labels_path.txt'))[0]
+            LABELS_SNB_PATH = load_text(os.path.join('data', 'soccernetball', 'labels_path.txt'))[0]
+
         #Store or load clips
         if self._store_mode == 'store':
             self._store_clips()
@@ -85,13 +92,6 @@ class ActionSpotDataset(Dataset):
             self._load_clips()
 
         self._total_len = len(self._frame_paths)
-
-        #Variables for SN & SNB label paths if datastes
-        if (self._dataset == 'soccernet') | (self._dataset == 'soccernetball'):
-            global LABELS_SN_PATH
-            global LABELS_SNB_PATH
-            LABELS_SN_PATH = load_text(os.path.join('data', 'soccernet', 'labels_path.txt'))[0]
-            LABELS_SNB_PATH = load_text(os.path.join('data', 'soccernetball', 'labels_path.txt'))[0]
 
     def _store_clips(self):
         #Initialize frame paths list
