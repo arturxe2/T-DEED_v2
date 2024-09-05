@@ -252,8 +252,8 @@ def main(args):
         if os.path.exists(split_path):
             split_data = ActionSpotVideoDataset(
                 classes, split_path, args.frame_dir, args.modality,
-                args.clip_len, overlap_len = args.clip_len // 2,
-                #args.clip_len, overlap_len = args.clip_len // 4 * 3 if args.dataset != 'soccernet' else args.clip_len // 2, # 3/4 overlap for video dataset, 1/2 overlap for soccernet
+                #args.clip_len, overlap_len = args.clip_len // 2,
+                args.clip_len, overlap_len = args.clip_len // 4 * 3 if args.dataset != 'soccernet' else args.clip_len // 2, # 3/4 overlap for video dataset, 1/2 overlap for soccernet
                 stride = stride, dataset = args.dataset)
 
             pred_file = None
