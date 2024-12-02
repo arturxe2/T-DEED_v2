@@ -24,6 +24,7 @@ from torch.optim.lr_scheduler import (
 from util.eval import evaluate, valMAP_SN, evaluate_SNB
 from SoccerNet.Evaluation.ActionSpotting import evaluate as evaluate_SN
 from dataset.frame import ActionSpotVideoDataset
+from util.dataset import load_classes
 
 
 #Constants
@@ -114,29 +115,37 @@ def main(args):
     wandb.login()
     wandb.init(config = args, dir = args.save_dir + '/wandb_logs', project = 'ExtendTDEED', name = args.model + '-' + str(args.seed))
 
-    # Get datasets train, validation (and validation for map -> Video dataset)
-    classes, pretrain_classes, train_data, val_data, val_data_frames = get_datasets(args)
-        
-    if args.store_mode == 'store':
-        print('Datasets have been stored correctly! Stop training here and rerun.')
-        sys.exit('Datasets have correctly been stored! Stop training here and rerun with load mode.')
-    else:
-        print('Datasets have been loaded from previous versions correctly!')
 
-    def worker_init_fn(id):
-        random.seed(id + epoch * 100)
-    loader_batch_size = args.batch_size // args.acc_grad_iter
+    if not args.only_test:
+        # Get datasets train, validation (and validation for map -> Video dataset)
+        classes, pretrain_classes, train_data, val_data, val_data_frames = get_datasets(args)
+            
+        if args.store_mode == 'store':
+            print('Datasets have been stored correctly! Stop training here and rerun.')
+            sys.exit('Datasets have correctly been stored! Stop training here and rerun with load mode.')
+        else:
+            print('Datasets have been loaded from previous versions correctly!')
 
-    # Dataloaders
-    train_loader = DataLoader(
-        train_data, shuffle=False, batch_size=loader_batch_size,
-        pin_memory=True, num_workers=args.num_workers,
-        prefetch_factor=2, worker_init_fn=worker_init_fn)
-        
-    val_loader = DataLoader(
-        val_data, shuffle=False, batch_size=loader_batch_size,
-        pin_memory=True, num_workers=args.num_workers,
-        prefetch_factor=2, worker_init_fn=worker_init_fn)
+        def worker_init_fn(id):
+            random.seed(id + epoch * 100)
+        loader_batch_size = args.batch_size // args.acc_grad_iter
+
+        # Dataloaders
+        train_loader = DataLoader(
+            train_data, shuffle=False, batch_size=loader_batch_size,
+            pin_memory=True, num_workers=args.num_workers,
+            prefetch_factor=2, worker_init_fn=worker_init_fn)
+            
+        val_loader = DataLoader(
+            val_data, shuffle=False, batch_size=loader_batch_size,
+            pin_memory=True, num_workers=args.num_workers,
+            prefetch_factor=2, worker_init_fn=worker_init_fn)
+
+    if args.only_test:
+        classes = load_classes(os.path.join('data', args.dataset, 'class.txt'))
+        pretrain_classes = None
+        if args.pretrain != None:
+            pretrain_classes = load_classes(os.path.join('data', args.pretrain['dataset'], 'class.txt'))
                 
     # Model
     model = TDEEDModel(args=args)
